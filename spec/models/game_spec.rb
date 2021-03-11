@@ -41,7 +41,6 @@ RSpec.describe Game, type: :model do
 
   # тесты на основную игровую логику
   context 'game mechanics' do
-
     # правильный ответ должен продолжать игру
     it 'answer correct continues game' do
       # текущий уровень игры и статус
@@ -59,6 +58,53 @@ RSpec.describe Game, type: :model do
       # игра продолжается
       expect(game_w_questions.status).to eq(:in_progress)
       expect(game_w_questions.finished?).to be_falsey
+    end
+
+    it 'takes money and game finished' do
+      # берем игру и отвечаем на текущий вопрос
+      q = game_w_questions.current_game_question
+      game_w_questions.answer_current_question!(q.correct_answer_key)
+    
+      # взяли деньги
+      game_w_questions.take_money!
+    
+      prize = game_w_questions.prize
+      expect(prize).to be > 0
+    
+      # проверяем что закончилась игра и пришли деньги игроку
+      expect(game_w_questions.status).to eq :money
+      expect(game_w_questions.finished?).to be_truthy
+      expect(user.balance).to eq prize
+    end
+  end
+
+  context 'game status' do
+    it 'fail' do
+      game_w_questions.is_failed = true
+      game_w_questions.finished_at = Time.now + 30.minutes
+      expect(game_w_questions.status).to eq(:fail)
+    end
+
+    it ':timeoute' do
+      game_w_questions.is_failed = true
+      game_w_questions.finished_at = Time.now + 36.minutes
+      expect(game_w_questions.status).to eq(:timeout)
+    end
+
+    it 'won' do
+      game_w_questions.finished_at = Time.now + 5.minutes
+      game_w_questions.current_level = Question::QUESTION_LEVELS.max + 1
+      expect(game_w_questions.status).to eq(:won)
+    end
+
+    it 'money' do
+      game_w_questions.finished_at = Time.now + 5.minutes
+      game_w_questions.current_level = Question::QUESTION_LEVELS.max
+      expect(game_w_questions.status).to eq(:money)
+    end
+
+    it 'in progress' do
+      expect(game_w_questions.status).to eq(:in_progress)      
     end
   end
 end
