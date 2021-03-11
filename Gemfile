@@ -18,7 +18,6 @@ gem 'font-awesome-rails'
 gem 'russian'
 
 gem 'bigdecimal', '1.3.5'
-gem 'pg'
 
 group :development, :test do
   gem 'sqlite3', '~> 1.3.13'
