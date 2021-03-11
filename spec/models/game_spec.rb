@@ -12,6 +12,7 @@ RSpec.describe Game, type: :model do
 
   # игра с прописанными игровыми вопросами
   let(:game_w_questions) { FactoryGirl.create(:game_with_questions, user: user) }
+  let(:game_question) { FactoryGirl.create(:game_question, a: 3, b: 2, c: 4, d: 1) }
 
   # Группа тестов на работу фабрики создания новых игр
   context 'Game Factory' do
@@ -75,6 +76,10 @@ RSpec.describe Game, type: :model do
       expect(game_w_questions.status).to eq :money
       expect(game_w_questions.finished?).to be_truthy
       expect(user.balance).to eq prize
+    end
+
+    it 'returns correct answer key' do
+      expect(game_question.correct_answer_key).to eq('d')
     end
   end
 
