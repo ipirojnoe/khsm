@@ -58,7 +58,7 @@ RSpec.describe Game, type: :model do
       expect(game_w_questions.current_game_question).not_to eq(q)
       # игра продолжается
       expect(game_w_questions.status).to eq(:in_progress)
-      expect(game_w_questions.finished?).to be_falsey
+      expect(game_w_questions.finished?).to eq(false)
     end
 
     it 'takes money and game finished' do
@@ -74,7 +74,7 @@ RSpec.describe Game, type: :model do
     
       # проверяем что закончилась игра и пришли деньги игроку
       expect(game_w_questions.status).to eq :money
-      expect(game_w_questions.finished?).to be_truthy
+      expect(game_w_questions.finished?).to eq(true)
       expect(user.balance).to eq prize
     end
 
@@ -104,31 +104,31 @@ RSpec.describe Game, type: :model do
     context 'when timeout' do
       it 'should be finished' do
         game_w_questions.created_at = 40.minutes.ago
-        expect(game_w_questions.answer_current_question!(correct_answer_key)).to be_falsey
-        expect(game_w_questions.finished?).to be_truthy
+        expect(game_w_questions.answer_current_question!(correct_answer_key)).to eq(false)
+        expect(game_w_questions.finished?).to eq(true)
         expect(game_w_questions.status).to eq(:timeout)
       end
     end
 
     context 'when correct answer' do
       it 'should return true' do
-        expect(game_w_questions.answer_current_question!(correct_answer_key)).to be_truthy
-        expect(game_w_questions.finished?).to be_falsey
+        expect(game_w_questions.answer_current_question!(correct_answer_key)).to eq(true)
+        expect(game_w_questions.finished?).to eq(false)
         expect(game_w_questions.status).to eq(:in_progress)
       end
 
       it 'should return true and finish game' do
         game_w_questions.current_level = Question::QUESTION_LEVELS.max
-        expect(game_w_questions.answer_current_question!(correct_answer_key)).to be_truthy
-        expect(game_w_questions.finished?).to be_truthy
+        expect(game_w_questions.answer_current_question!(correct_answer_key)).to eq(true)
+        expect(game_w_questions.finished?).to eq(true)
         expect(game_w_questions.status).to eq(:won)
       end
     end
     
     context 'when wrong answer' do
       it 'should return false and game finished' do
-        expect(game_w_questions.answer_current_question!('wrong answer')).to be_falsey
-        expect(game_w_questions.finished?).to be_truthy
+        expect(game_w_questions.answer_current_question!('wrong answer')).to eq(false)
+        expect(game_w_questions.finished?).to eq(true)
         expect(game_w_questions.status).to eq(:fail)
       end
     end
