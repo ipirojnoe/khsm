@@ -78,51 +78,64 @@ RSpec.describe Game, type: :model do
       expect(user.balance).to eq prize
     end
 
+  end
+
+  describe '#correct_answer_key' do
     it 'returns correct answer key' do
       expect(game_question.correct_answer_key).to eq('d')
     end
+  end
 
+  describe '#current_game_question' do
     it 'returns current game question' do
       expect(game_w_questions.current_game_question).to eq(game_w_questions.game_questions[0])
     end
+  end
 
+  describe '#previous_level' do
     it 'returns previous level' do
       expect(game_w_questions.previous_level).to eq(-1)
     end
   end
 
-  context 'game answer_current_question!' do
+  describe '#answer_current_question!' do
     let(:correct_answer_key) { game_w_questions.current_game_question.correct_answer_key }
 
-    it 'game finished' do
-      game_w_questions.created_at = 40.minutes.ago
-      expect(game_w_questions.answer_current_question!(correct_answer_key)).to be_falsey
-      expect(game_w_questions.finished?).to be_truthy
-      expect(game_w_questions.status).to eq(:timeout)
+    context 'when timeout' do
+      it 'should be finished' do
+        game_w_questions.created_at = 40.minutes.ago
+        expect(game_w_questions.answer_current_question!(correct_answer_key)).to be_falsey
+        expect(game_w_questions.finished?).to be_truthy
+        expect(game_w_questions.status).to eq(:timeout)
+      end
     end
 
-    it 'correct answer' do
-      expect(game_w_questions.answer_current_question!(correct_answer_key)).to be_truthy
-      expect(game_w_questions.finished?).to be_falsey
-      expect(game_w_questions.status).to eq(:in_progress)
-    end
+    context 'when correct answer' do
+      it 'should return true' do
+        expect(game_w_questions.answer_current_question!(correct_answer_key)).to be_truthy
+        expect(game_w_questions.finished?).to be_falsey
+        expect(game_w_questions.status).to eq(:in_progress)
+      end
 
-    it 'correct answer and finish game' do
-      game_w_questions.current_level = Question::QUESTION_LEVELS.max
-      expect(game_w_questions.answer_current_question!(correct_answer_key)).to be_truthy
-      expect(game_w_questions.finished?).to be_truthy
-      expect(game_w_questions.status).to eq(:won)
+      it 'should return true and finish game' do
+        game_w_questions.current_level = Question::QUESTION_LEVELS.max
+        expect(game_w_questions.answer_current_question!(correct_answer_key)).to be_truthy
+        expect(game_w_questions.finished?).to be_truthy
+        expect(game_w_questions.status).to eq(:won)
+      end
     end
-
-    it 'wrong answer' do
-      expect(game_w_questions.answer_current_question!('wrong answer')).to be_falsey
-      expect(game_w_questions.finished?).to be_truthy
-      expect(game_w_questions.status).to eq(:fail)
+    
+    context 'when wrong answer' do
+      it 'should return false and game finished' do
+        expect(game_w_questions.answer_current_question!('wrong answer')).to be_falsey
+        expect(game_w_questions.finished?).to be_truthy
+        expect(game_w_questions.status).to eq(:fail)
+      end
     end
   end
 
-  context 'game status' do
-    it 'fail' do
+  describe '#status' do
+    it ':fail' do
       game_w_questions.is_failed = true
       game_w_questions.finished_at = Time.now + 30.minutes
       expect(game_w_questions.status).to eq(:fail)
@@ -134,19 +147,19 @@ RSpec.describe Game, type: :model do
       expect(game_w_questions.status).to eq(:timeout)
     end
 
-    it 'won' do
+    it ':won' do
       game_w_questions.finished_at = Time.now + 5.minutes
       game_w_questions.current_level = Question::QUESTION_LEVELS.max + 1
       expect(game_w_questions.status).to eq(:won)
     end
 
-    it 'money' do
+    it ':money' do
       game_w_questions.finished_at = Time.now + 5.minutes
       game_w_questions.current_level = Question::QUESTION_LEVELS.max
       expect(game_w_questions.status).to eq(:money)
     end
 
-    it 'in progress' do
+    it ':in progress' do
       expect(game_w_questions.status).to eq(:in_progress)      
     end
   end
