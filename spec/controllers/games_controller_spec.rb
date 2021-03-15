@@ -164,11 +164,11 @@ RSpec.describe GamesController, type: :controller do
   end
 
   describe 'User play game' do
+    before(:each) { sign_in user }
+
     context 'starts second game while playing first' do
-      it 'should redirect user to game in progress' do
-        sign_in user
-        
-        expect(game_w_questions.finished?).to be_falsey
+      it 'should redirect user to game in progress' do     
+        expect(game_w_questions.finished?).to eq(false)
 
         expect { post :create }.to change(Game, :count).by(0)
       
@@ -177,6 +177,21 @@ RSpec.describe GamesController, type: :controller do
       
         expect(response).to redirect_to(game_path(game_w_questions))
         expect(flash[:alert]).to be_truthy
+      end
+    end
+
+    context 'when wrong answer' do
+      it 'should return false and game finished' do
+        put :answer, id: game_w_questions.id, letter: 'a'
+
+        game = assigns(:game)
+        answer_is_correct = assigns(:answer_is_correct)
+        
+        expect(answer_is_correct).to eq(false)
+        expect(game.finished?).to eq(true)
+        expect(game.status).to eq(:fail)
+        expect(flash[:alert]).to be_truthy
+        expect(response).to redirect_to(user_path(user))
       end
     end
   end
