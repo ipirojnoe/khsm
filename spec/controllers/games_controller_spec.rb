@@ -20,13 +20,37 @@ RSpec.describe GamesController, type: :controller do
   # группа тестов для незалогиненного юзера (Анонимус)
   context 'Anon' do
     # из экшена show анона посылаем
-    it 'kick from #show' do
+    it 'should kick from #show' do
       # вызываем экшен
       get :show, id: game_w_questions.id
       # проверяем ответ
       expect(response.status).not_to eq(200) # статус не 200 ОК
       expect(response).to redirect_to(new_user_session_path) # devise должен отправить на логин
       expect(flash[:alert]).to be_truthy # во flash должен быть прописана ошибка
+    end
+
+    it 'should kick from #create' do
+      post :create, id: game_w_questions.id
+
+      expect(response.status).not_to eq(200)
+      expect(response).to redirect_to(new_user_session_path)
+      expect(flash[:alert]).to be_truthy
+    end
+
+    it 'should kick from #answer' do
+      put :answer, id: game_w_questions.id
+
+      expect(response.status).not_to eq(200)
+      expect(response).to redirect_to(new_user_session_path)
+      expect(flash[:alert]).to be_truthy
+    end
+
+    it 'should kick from #take_money' do
+      put :take_money, id: game_w_questions.id
+
+      expect(response.status).not_to eq(200)
+      expect(response).to redirect_to(new_user_session_path)
+      expect(flash[:alert]).to be_truthy
     end
   end
 
