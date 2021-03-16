@@ -46,6 +46,17 @@ RSpec.describe GameQuestion, type: :model do
       # проверяем новые значение хэша
       expect(gq.help_hash).to eq({some_key1: 'blabla1', 'some_key2' => 'blabla2'})
     end
+
+    it 'should return two keys to asnwer' do
+      expect(game_question.help_hash).not_to include(:fifty_fifty)
+
+      game_question.add_fifty_fifty
+      expect(game_question.help_hash).to include(:fifty_fifty)
+      
+      help_hash = game_question.help_hash[:fifty_fifty]
+      expect(help_hash.size).to eq(2)
+      expect(help_hash).to include('b')
+    end
   end
 
   # help_hash у нас имеет такой формат:
