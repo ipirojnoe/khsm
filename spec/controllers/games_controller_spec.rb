@@ -186,4 +186,70 @@ RSpec.describe GamesController, type: :controller do
       end
     end
   end
+
+  describe 'User uses help' do
+    before(:each) { sign_in user }
+
+    context 'when fifty fifty help' do
+      it 'should return give 2 variants and redirect' do
+        expect(game_w_questions.fifty_fifty_used).to eq(false)
+
+        put :help, id: game_w_questions.id, help_type: 'fifty_fifty'
+        game = assigns(:game)
+
+        expect(flash[:info]).to be_truthy
+        expect(response).to redirect_to(game_path(game))
+        expect(game.finished?).to eq(false)
+        expect(game.fifty_fifty_used).to eq(true)
+
+        question = game.current_game_question
+        expect(question.help_hash[:fifty_fifty]).to be_truthy
+        expect(question.help_hash[:fifty_fifty].size).to eq(2)
+      end
+    end
+
+    context 'when fifty fifty help twice' do
+      it 'should redirect with alert message' do
+        expect(game_w_questions.fifty_fifty_used).to eq(false)
+
+        put :help, id: game_w_questions.id, help_type: 'fifty_fifty'
+        game = assigns(:game)
+
+        expect(flash[:info]).to be_truthy
+        expect(flash[:alert]).to be_falsey
+        expect(game.finished?).to eq(false)
+        expect(game.fifty_fifty_used).to eq(true)
+        expect(response).to redirect_to(game_path(game_w_questions))
+
+        put :help, id: game.id, help_type: 'fifty_fifty'
+        game_second_time = assigns(:game)
+
+        expect(flash[:alert]).to be_truthy
+        expect(flash[:info]).to be_truthy
+        expect(game_second_time.finished?).to eq(false)
+        expect(game_second_time.fifty_fifty_used).to eq(true)
+        expect(response).to redirect_to(game_path(game_second_time))
+      end
+    end
+
+    context 'when unknown help' do
+      it 'should alert' do
+        expect(game_w_questions.fifty_fifty_used).to eq(false)
+        expect(game_w_questions.audience_help_used).to eq(false)
+        expect(game_w_questions.friend_call_used).to eq(false)
+
+        put :help, id: game_w_questions.id, help_type: 'something'
+        game = assigns(:game)
+
+
+        expect(game.fifty_fifty_used).to eq(false)
+        expect(game.audience_help_used).to eq(false)
+        expect(game.friend_call_used).to eq(false)
+
+        expect(flash[:alert]).to be_truthy
+        expect(game.finished?).to eq(false)
+        expect(response).to redirect_to(game_path(game))
+      end
+    end
+  end
 end
