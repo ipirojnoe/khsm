@@ -9,9 +9,7 @@ require 'rails_helper'
 # Обратите внимание, что работу самих валидаций не надо тестировать (это работа
 # авторов rails). Смысл именно в проверке _наличия_ у модели конкретных валидаций.
 RSpec.describe Question, type: :model do
-
   context 'validations check' do
-
     it { should validate_presence_of :text }
     it { should validate_presence_of :level }
 

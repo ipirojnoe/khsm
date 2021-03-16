@@ -1,14 +1,7 @@
 # (c) goodprogrammer.ru
 
 require 'rails_helper'
-require 'support/my_spec_helper' # наш собственный класс с вспомогательными методами
-
-# Тестовый сценарий для игрового контроллера
-# Самые важные здесь тесты:
-#   1. на авторизацию (чтобы к чужим юзерам не утекли не их данные)
-#   2. на четкое выполнение самых важных сценариев (требований) приложения
-#   3. на передачу граничных/неправильных данных в попытке сломать контроллер
-#
+require 'support/my_spec_helper'
 RSpec.describe GamesController, type: :controller do
   # обычный пользователь
   let(:user) { FactoryGirl.create(:user) }
@@ -23,10 +16,11 @@ RSpec.describe GamesController, type: :controller do
     it 'should kick from #show' do
       # вызываем экшен
       get :show, id: game_w_questions.id
+
       # проверяем ответ
       expect(response.status).not_to eq(200) # статус не 200 ОК
       expect(response).to redirect_to(new_user_session_path) # devise должен отправить на логин
-      expect(flash[:alert]).to be_truthy # во flash должен быть прописана ошибка
+      expect(flash[:alert]).to be_truthy
     end
 
     it 'should kick from #create' do
@@ -126,37 +120,34 @@ RSpec.describe GamesController, type: :controller do
       expect(flash[:alert]).to be_truthy
     end
   end
-  
+
   describe 'User takes money' do
     context 'when anon user' do
       it 'should redirect to sign in page' do
         put :take_money, id: game_w_questions.id
-        
         expect(response).to redirect_to(new_user_session_path)
       end
     end
 
     context 'when auth user' do
       it 'should not give user any money' do
-        sign_in user 
+        sign_in user
         put :take_money, id: game_w_questions.id
-        
+
         expect(response).to redirect_to(user_path(user))
         expect(flash[:warning]).to be_truthy
       end
 
       it 'should give user fire proof prize' do
-        sign_in user 
+        sign_in user
         game_w_questions.update_attribute(:current_level, 2)
 
         put :take_money, id: game_w_questions.id
         game = assigns(:game)
         expect(game.finished?).to be_truthy
         expect(game.prize).to eq(200)
-      
         user.reload
         expect(user.balance).to eq(200)
-      
         expect(response).to redirect_to(user_path(user))
         expect(flash[:warning]).to be_truthy
       end
@@ -167,14 +158,14 @@ RSpec.describe GamesController, type: :controller do
     before(:each) { sign_in user }
 
     context 'starts second game while playing first' do
-      it 'should redirect user to game in progress' do     
+      it 'should redirect user to game in progress' do
         expect(game_w_questions.finished?).to eq(false)
 
         expect { post :create }.to change(Game, :count).by(0)
-      
+
         game = assigns(:game)
         expect(game).to be_nil
-      
+
         expect(response).to redirect_to(game_path(game_w_questions))
         expect(flash[:alert]).to be_truthy
       end
@@ -186,7 +177,7 @@ RSpec.describe GamesController, type: :controller do
 
         game = assigns(:game)
         answer_is_correct = assigns(:answer_is_correct)
-        
+
         expect(answer_is_correct).to eq(false)
         expect(game.finished?).to eq(true)
         expect(game.status).to eq(:fail)

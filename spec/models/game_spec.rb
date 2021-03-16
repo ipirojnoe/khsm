@@ -39,7 +39,6 @@ RSpec.describe Game, type: :model do
     end
   end
 
-
   # тесты на основную игровую логику
   context 'game mechanics' do
     # правильный ответ должен продолжать игру
@@ -65,19 +64,18 @@ RSpec.describe Game, type: :model do
       # берем игру и отвечаем на текущий вопрос
       q = game_w_questions.current_game_question
       game_w_questions.answer_current_question!(q.correct_answer_key)
-    
+
       # взяли деньги
       game_w_questions.take_money!
-    
+
       prize = game_w_questions.prize
       expect(prize).to be > 0
-    
+
       # проверяем что закончилась игра и пришли деньги игроку
       expect(game_w_questions.status).to eq :money
       expect(game_w_questions.finished?).to eq(true)
       expect(user.balance).to eq prize
     end
-
   end
 
   describe '#correct_answer_key' do
@@ -124,7 +122,7 @@ RSpec.describe Game, type: :model do
         expect(game_w_questions.status).to eq(:won)
       end
     end
-    
+
     context 'when wrong answer' do
       it 'should return false and game finished' do
         expect(game_w_questions.answer_current_question!('wrong answer')).to eq(false)
@@ -160,7 +158,7 @@ RSpec.describe Game, type: :model do
     end
 
     it ':in progress' do
-      expect(game_w_questions.status).to eq(:in_progress)      
+      expect(game_w_questions.status).to eq(:in_progress)
     end
   end
 end
