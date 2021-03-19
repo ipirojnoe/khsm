@@ -78,15 +78,23 @@ class GamesController < ApplicationController
   # params[:help_type]
   def help
     # используем помощь в игре и по результату задаем сообщение юзеру
-    msg = if @game.use_help(params[:help_type].to_sym)
-            { flash: { info: I18n.t('controllers.games.help_used') } }
-          else
-            { alert: I18n.t('controllers.games.help_not_used') }
-          end
+    @msg = if @game.use_help(params[:help_type].to_sym)
+             { flash: { info: I18n.t('controllers.games.help_used') } }
+           else
+             { alert: I18n.t('controllers.games.help_not_used') }
+           end
 
-    redirect_to game_path(@game), msg
+    @help_type = params[:help_type]
+    @game_question = @game.current_game_question
+
+    respond_to do |format|
+      format.html do
+        redirect_to game_path(@game), @msg
+      end
+
+      format.js {}
+    end
   end
-
 
   private
 

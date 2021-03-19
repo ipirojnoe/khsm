@@ -1,0 +1,22 @@
+<% if help_text.key?(:friend_call) || help_text.key?(:audience_help) %>
+  <div class="row buffer-top-lg">
+    <div class="col-xs-12">
+      <% if help_text.key?(:friend_call) %>
+        <div class="alert alert-info text-center">
+          <%= help_text[:friend_call] %>
+        </div>
+      <% end %>
+
+      <% if help_text.key?(:audience_help) %>
+        <p>Зрители считают: </p>
+        <% help_text[:audience_help].sort.map do |key, value| %>
+          <div class="progress">
+            <div class="progress-bar progress-bar-danger" style="width: <%= value %>%;">
+              <%= key.upcase %>: <%= value %>%
+            </div>
+          </div>
+        <% end %>
+      <% end %>
+    </div>
+  </div>
+<% end %>

@@ -1,0 +1,21 @@
+alert = $('#main-col > .alert-danger')
+
+if(alert.length){
+  alert.remove();
+}
+
+$('#main-col').prepend('<%= escape_javascript(render partial: 'layouts/flash', object: @msg) %>');
+
+if(`${"<%= @help_type %>" == "fifty_fifty"}` == 'true'){
+  $('.game-question').html("<%= escape_javascript (
+    render partial: 'game_question', object: @game_question
+  ) %>");
+}else{
+  $('.game-help-info').html("<%= escape_javascript (
+      render partial: 'help_text', object: @game_question.help_hash
+    ) %>");
+}
+
+$('.<%= @help_type %>').remove();
+
+
