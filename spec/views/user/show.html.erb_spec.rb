@@ -1,7 +1,7 @@
 require 'rails_helper'
 
 RSpec.describe 'users/show', type: :view do
-  let(:game) { FactoryGirl.create(:game, id: 55, created_at: Time.parse('02.02.2021 13:37'), current_level: 6, prize: 1000) }
+  let(:game) { FactoryGirl.create(:game, created_at: Time.parse('02.02.2021 13:37'), current_level: 6, prize: 1000) }
 
   context 'Anon user' do
     before(:each) do
@@ -42,8 +42,9 @@ RSpec.describe 'users/show', type: :view do
     it 'should display games' do
       render partial: 'users/game', object: game
 
-      expect(rendered).to match '5'
-
+      expect(rendered).to match '1 000 ₽'
+      expect(rendered).to match 'в процессе'
+      expect(rendered).to match '6'
       expect(rendered).to match '02 февр., 13:37'
     end
   end
